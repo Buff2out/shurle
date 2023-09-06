@@ -3,7 +3,7 @@ package pages
 import (
 	"fmt"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlserv"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -19,7 +19,7 @@ func HandleShurlPage(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusCreated) // 201
 		hash := shserv.EvaluateHashAndReturn()
 
-		b, err := ioutil.ReadAll(req.Body)
+		b, err := io.ReadAll(req.Body)
 		if err != nil {
 			panic(err)
 		}
