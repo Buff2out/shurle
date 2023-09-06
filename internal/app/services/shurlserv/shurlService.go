@@ -1,4 +1,4 @@
-package shurlService
+package shurlserv
 
 import (
 	"math/rand"

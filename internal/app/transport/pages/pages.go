@@ -2,7 +2,7 @@ package pages
 
 import (
 	"fmt"
-	shserv "github.com/Buff2out/shurle/internal/app/services/shurlService"
+	shserv "github.com/Buff2out/shurle/internal/app/services/shurlserv"
 	"io/ioutil"
 	"net/http"
 	"strings"
