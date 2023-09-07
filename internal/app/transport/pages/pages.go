@@ -12,7 +12,7 @@ var links = make(map[string]string)
 
 func HandleShurlPage(res http.ResponseWriter, req *http.Request) {
 	//res.Header().Set("Access-Control-Allow-Origin", "*")
-	if req.Method == http.MethodPost { // Добавить ещё условие проверки длинности
+	if http.MethodPost == req.Method { // Добавить ещё условие проверки длинности
 
 		res.Header().Set("content-type", "text/plain") // wow, http.ContentTypeText doesn't work
 
@@ -28,7 +28,7 @@ func HandleShurlPage(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			return
 		}
-	} else if req.Method == http.MethodGet { // Добавить ещё условие проверки длинности
+	} else if http.MethodGet == req.Method {
 		//fmt.Println("gsdf")
 		res.Header().Set("content-type", "text/plain") // wow, http.ContentTypeText doesn't work
 		hash := strings.Split(req.URL.Path, "/")[1]
