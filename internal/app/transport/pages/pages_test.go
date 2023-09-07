@@ -39,6 +39,11 @@ func TestHandleShurlPage(t *testing.T) {
 
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
 			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
+
+			err := result.Body.Close()
+			if err != nil {
+				return
+			}
 			//HandleShurlPage(tt.args.res, tt.args.req)
 		})
 	}
