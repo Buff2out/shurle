@@ -8,11 +8,16 @@ import (
 	"net/http"
 )
 
+type NetAddress struct {
+	Host string
+	Port string
+}
+
 var links = make(map[string]string)
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(prefix string) *gin.Engine {
 	r := gin.Default()
-
+	/* первый нюанс - когда r.GET, r.POST */
 	r.GET("/:idvalue", func(c *gin.Context) {
 		id := c.Params.ByName("idvalue")
 
@@ -26,7 +31,7 @@ func SetupRouter() *gin.Engine {
 			panic(err)
 		}
 		links[id] = string(b)
-		c.String(http.StatusCreated, fmt.Sprintf(`%s:%s%s%s%s%s`, `http`, `/`, `/`, `localhost:8080`, `/`, id))
+		c.String(http.StatusCreated, fmt.Sprintf(`%s:%s%s%s%s%s`, `http`, `/`, `/`, prefix, `/`, id))
 	})
 
 	return r

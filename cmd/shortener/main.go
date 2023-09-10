@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	cfgs "github.com/Buff2out/shurle/internal/app/config/server"
 	"github.com/Buff2out/shurle/internal/app/transport/ginsetrout"
 )
 
@@ -18,10 +20,33 @@ func main() {
 	//	panic(err)
 	//}
 
-	r := ginsetrout.SetupRouter()
+	serverConfig := cfgs.GetServerConfigFromFlags()
+	fmt.Println(serverConfig)
+	r := ginsetrout.SetupRouter(serverConfig.P)
 	// Listen and Server in 0.0.0.0:8080
-	err := r.Run(":8080")
+	err := r.Run(fmt.Sprintf("%s", serverConfig.S))
 	if err != nil {
 		panic(err)
 	}
+
+	/*
+		package main
+
+		import (
+		    "fmt"
+		    "net/http"
+
+		    "github.com/gin-gonic/gin"
+		)
+
+		func main() {
+		    r := gin.Default()
+		    r.GET("/foo", func(c *gin.Context) {
+		        c.String(http.StatusOK, "bar")
+		        fmt.Println(c.Request.Host+c.Request.URL.String())
+		    })
+		    // Listen and Server in 0.0.0.0:8080
+		    r.Run(":8080")
+		}
+	*/
 }
