@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	cfgs "github.com/Buff2out/shurle/internal/app/config/server"
 	"github.com/Buff2out/shurle/internal/app/transport/ginsetrout"
 )
@@ -24,7 +23,7 @@ func main() {
 	//fmt.Println(serverConfig)
 	r := ginsetrout.SetupRouter(serverConfig.P)
 	// Listen and Server in 0.0.0.0:8080
-	err := r.Run(fmt.Sprintf("%s", serverConfig.S))
+	err := r.Run(serverConfig.S)
 	if err != nil {
 		panic(err)
 	}
