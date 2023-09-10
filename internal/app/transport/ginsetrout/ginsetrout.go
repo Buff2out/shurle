@@ -31,7 +31,7 @@ func SetupRouter(prefix string) *gin.Engine {
 			panic(err)
 		}
 		links[id] = string(b)
-		c.String(http.StatusCreated, fmt.Sprintf(`%s:%s%s%s%s%s`, `http`, `/`, `/`, prefix, `/`, id))
+		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
 	})
 
 	return r
