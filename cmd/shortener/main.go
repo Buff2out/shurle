@@ -21,7 +21,7 @@ func main() {
 	//}
 
 	serverConfig := cfgs.GetServerConfigFromFlags()
-	fmt.Println(serverConfig)
+	//fmt.Println(serverConfig)
 	r := ginsetrout.SetupRouter(serverConfig.P)
 	// Listen and Server in 0.0.0.0:8080
 	err := r.Run(fmt.Sprintf("%s", serverConfig.S))
