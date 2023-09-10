@@ -14,7 +14,7 @@ var (
 
 func init() {
 	Socket = flag.String("a", `localhost:8080`, "socket = host:port")
-	Prefix = flag.String("b", `localhost:8080`, "http://prefix/hashid")
+	Prefix = flag.String("b", `http://localhost:8080`, "prefix/hashid")
 }
 
 func GetServerConfigFromFlags() ServerConfig {
