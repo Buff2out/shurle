@@ -16,13 +16,15 @@ type Config struct {
 
 func GetEnvs() (bool, server.ServerConfig) {
 	var cfgparams Config
+	//fmt.Println("ошибки нет cfgparams", cfgparams)
+	err := env.Parse(&cfgparams)
 	cfg := server.ServerConfig{
 		S: cfgparams.Socket,
 		P: cfgparams.Prefix,
 	}
-	err := env.Parse(&cfgparams)
 	if err != nil {
 		return true, server.ServerConfig{} // true == ДА, МЫ ОШИБЛИСЬ
 	}
+	//fmt.Println("ошибки нет cfg", cfg)
 	return false, cfg // false == НЕТ, ошибка отсутствует, ВСЁ ОК!
 }

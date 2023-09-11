@@ -23,6 +23,7 @@ func main() {
 	//envs.IsEnvsSet()
 
 	serverConfig := cfgsc.GetServerConfig()
+	//fmt.Println("ошибки нет main.go:", serverConfig)
 	r := ginsetrout.SetupRouter(serverConfig.P)
 	// Listen and Server in 0.0.0.0:8080
 	err := r.Run(serverConfig.S)
