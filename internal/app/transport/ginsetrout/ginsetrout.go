@@ -2,7 +2,7 @@ package ginsetrout
 
 import (
 	"fmt"
-	shserv "github.com/Buff2out/shurle/internal/app/services/shurlserv"
+	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
