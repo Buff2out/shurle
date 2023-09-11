@@ -25,8 +25,8 @@ func GetServerConfigFromFlags() ServerConfig {
 	// костыль номер бесконечность:
 	if *Socket == "" || *Prefix == "" {
 		return ServerConfig{
-			S: "localhost:8888",
-			P: "http://localhost:8000",
+			S: "localhost:8080",
+			P: "http://localhost:8080",
 		}
 	}
 	return ServerConfig{
