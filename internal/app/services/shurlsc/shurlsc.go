@@ -1,4 +1,4 @@
-package shurlserv
+package shurlsc
 
 import (
 	"math/rand"
