@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/Buff2out/shurle/internal/app/config/server"
 	"github.com/Buff2out/shurle/internal/app/services/cfgsc"
 	"github.com/Buff2out/shurle/internal/app/transport/ginsetrout"
 )
