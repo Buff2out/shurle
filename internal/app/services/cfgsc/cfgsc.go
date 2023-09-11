@@ -7,7 +7,7 @@ import (
 
 func GetServerConfig() sv.ServerConfig {
 	isGot, cfg := envs.GetEnvs()
-	if isGot {
+	if isGot { // is gotError
 		return sv.GetServerConfigFromFlags()
 	}
 	return cfg

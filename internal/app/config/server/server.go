@@ -22,13 +22,13 @@ func GetServerConfigFromFlags() ServerConfig {
 	//serverConfig.Socket = flag.String("a", `localhost:8080`, "socket = host:port")
 	//serverConfig.Prefix = flag.String("b", `localhost:8080`, "http://prefix/hashid")
 	flag.Parse()
-	// костыль номер бесконечность:
-	if *Socket == "" || *Prefix == "" {
-		return ServerConfig{
-			S: "localhost:8080",
-			P: "http://localhost:8080",
-		}
-	}
+	//// костыль номер бесконечность:
+	//if *Socket == "" || *Prefix == "" {
+	//	return ServerConfig{
+	//		S: "localhost:8080",
+	//		P: "http://localhost:8080",
+	//	}
+	//}
 	return ServerConfig{
 		S: *Socket,
 		P: *Prefix,
