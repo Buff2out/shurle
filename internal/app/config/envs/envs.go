@@ -22,7 +22,7 @@ func GetEnvs() (bool, server.ServerConfig) {
 	}
 	err := env.Parse(&cfgparams)
 	if err != nil {
-		return false, cfg
+		return true, server.ServerConfig{} // true == ДА, МЫ ОШИБЛИСЬ
 	}
-	return true, cfg
+	return false, cfg // false == НЕТ, ошибка отсутствует, ВСЁ ОК!
 }

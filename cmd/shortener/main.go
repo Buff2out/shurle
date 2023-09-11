@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Buff2out/shurle/internal/app/services/cfgsc"
 	"github.com/Buff2out/shurle/internal/app/transport/ginsetrout"
 )
@@ -22,7 +23,7 @@ func main() {
 	//envs.IsEnvsSet()
 
 	serverConfig := cfgsc.GetServerConfig()
-	//fmt.Println(serverConfig)
+	fmt.Println(serverConfig)
 	r := ginsetrout.SetupRouter(serverConfig.P)
 	// Listen and Server in 0.0.0.0:8080
 	err := r.Run(serverConfig.S)
