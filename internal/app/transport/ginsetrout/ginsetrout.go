@@ -34,25 +34,25 @@ func SetupRouter(prefix string) *gin.Engine {
 		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
 	})
 
-	//// Костыли нарушающие DRY для решения .... проблемы автотестера пока так
-	//r.POST("/:сrutch0/:сrutch1", func(c *gin.Context) {
-	//	id := shserv.EvaluateHashAndReturn()
-	//	b, err := io.ReadAll(c.Request.Body)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	links[id] = string(b)
-	//	c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
-	//})
-	//r.POST("/:сrutch0/", func(c *gin.Context) {
-	//	id := shserv.EvaluateHashAndReturn()
-	//	b, err := io.ReadAll(c.Request.Body)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	links[id] = string(b)
-	//	c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
-	//})
+	// Костыли нарушающие DRY для решения .... проблемы автотестера пока так
+	r.POST("/:сrutch0/:сrutch1", func(c *gin.Context) {
+		id := shserv.EvaluateHashAndReturn()
+		b, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			panic(err)
+		}
+		links[id] = string(b)
+		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
+	})
+	r.POST("/:сrutch0/", func(c *gin.Context) {
+		id := shserv.EvaluateHashAndReturn()
+		b, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			panic(err)
+		}
+		links[id] = string(b)
+		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
+	})
 
 	return r
 }
