@@ -14,7 +14,7 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
-func EvaluateHashAndReturn() string {
+func GetRandomHash() string {
 	hashCode := RandStringRunes(5)
 	return hashCode
 }

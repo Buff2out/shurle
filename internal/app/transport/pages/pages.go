@@ -17,7 +17,7 @@ func HandleShurlPage(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("content-type", "text/plain") // wow, http.ContentTypeText doesn't work
 
 		res.WriteHeader(http.StatusCreated) // 201
-		hash := shserv.EvaluateHashAndReturn()
+		hash := shserv.GetRandomHash()
 
 		b, err := io.ReadAll(req.Body)
 		if err != nil {
