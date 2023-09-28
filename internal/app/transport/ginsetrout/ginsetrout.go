@@ -16,7 +16,7 @@ type NetAddress struct {
 	Port string
 }
 
-func MWPostServeUrl(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) { // mw - не nfs most wanted, а MiddleWare
+func MWPostServeURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) { // mw - не nfs most wanted, а MiddleWare
 	// наконец-то норм мидлварь, делаем до ретёрна что хотим
 
 	//такс, у меня отличная мысль, реализовать функцию автологгирования, чтобы само время ставилось и кастомное сообщение
@@ -40,7 +40,7 @@ func MWPostServeUrl(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context
 	}
 }
 
-func MWGetOriginUrl(sugar *zap.SugaredLogger) func(c *gin.Context) {
+func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 	// миддлварь, логгируем что хотим
 	timeStartingServer := time.Now()
 	sugar.Infow(
@@ -65,9 +65,9 @@ var links = make(map[string]string)
 
 func SetupRouter(prefix string, sugar *zap.SugaredLogger) *gin.Engine {
 	r := gin.Default()
-	r.GET("/:idvalue", MWGetOriginUrl(sugar))
-	r.POST("/", MWPostServeUrl(prefix, sugar))
-	r.POST("/:сrutch0/", MWPostServeUrl(prefix, sugar))
-	r.POST("/:сrutch0/:сrutch1", MWPostServeUrl(prefix, sugar))
+	r.GET("/:idvalue", MWGetOriginURL(sugar))
+	r.POST("/", MWPostServeURL(prefix, sugar))
+	r.POST("/:сrutch0/", MWPostServeURL(prefix, sugar))
+	r.POST("/:сrutch0/:сrutch1", MWPostServeURL(prefix, sugar))
 	return r
 }
