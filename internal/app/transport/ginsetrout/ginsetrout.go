@@ -1,7 +1,9 @@
 package ginsetrout
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/Buff2out/shurle/internal/app/api/shortener"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -40,6 +42,66 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context
 	}
 }
 
+func MWPostApiURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) {
+	sugar.Infow(
+		"POST api url",
+	)
+	return func(c *gin.Context) {
+		timeStartingRequest := time.Now()
+		id := shserv.GetRandomHash()
+		b, err := io.ReadAll(c.Request.Body)
+
+		var reqJSON shortener.OriginURL
+		var respJSON shortener.Shlink
+
+		if err != nil {
+			panic(err)
+		}
+		if err = json.Unmarshal(b, &reqJSON); err != nil {
+			panic(err)
+		}
+		// Записываем хеш в ассоциатор с урлом
+		links[id] = reqJSON.URL
+
+		// формируем ответ
+		respJSON.Result = fmt.Sprintf(`%s%s%s`, prefix, `/`, id)
+		//out, err := json.MarshalIndent(respJSON, "", "   ")
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		c.JSON(http.StatusCreated, respJSON)
+		timeEndingRequest := time.Now()
+		sugar.Infow(
+			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
+			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+		)
+	}
+}
+
+//func MWGetApiURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
+//	sugar.Infow(
+//		"GET api url",
+//	)
+//	return func(c *gin.Context) {
+//		timeStartingRequest := time.Now()
+//		id := c.Params.ByName("idvalue")
+//
+//		c.Header("Location", links[id])
+//		var resp shortener.OriginURL
+//		resp.URL = links[id]
+//		//out, err := json.Marshal(resp)
+//		//if err != nil {
+//		//	log.Fatal(err)
+//		//}
+//		c.JSON(http.StatusTemporaryRedirect, resp)
+//		timeEndingRequest := time.Now()
+//		sugar.Infow(
+//			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
+//			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+//		)
+//	}
+//}
+
 func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 	// миддлварь, логгируем что хотим
 	timeStartingServer := time.Now()
@@ -69,5 +131,6 @@ func SetupRouter(prefix string, sugar *zap.SugaredLogger) *gin.Engine {
 	r.POST("/", MWPostServeURL(prefix, sugar))
 	r.POST("/:сrutch0/", MWPostServeURL(prefix, sugar))
 	r.POST("/:сrutch0/:сrutch1", MWPostServeURL(prefix, sugar))
+	r.POST("/api/shorten", MWPostApiURL(prefix, sugar))
 	return r
 }
