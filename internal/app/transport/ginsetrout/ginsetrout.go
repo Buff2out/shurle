@@ -42,7 +42,7 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context
 	}
 }
 
-func MWPostApiURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) {
+func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) {
 	sugar.Infow(
 		"POST api url",
 	)
@@ -131,6 +131,6 @@ func SetupRouter(prefix string, sugar *zap.SugaredLogger) *gin.Engine {
 	r.POST("/", MWPostServeURL(prefix, sugar))
 	r.POST("/:сrutch0/", MWPostServeURL(prefix, sugar))
 	r.POST("/:сrutch0/:сrutch1", MWPostServeURL(prefix, sugar))
-	r.POST("/api/shorten", MWPostApiURL(prefix, sugar))
+	r.POST("/api/shorten", MWPostAPIURL(prefix, sugar))
 	return r
 }
