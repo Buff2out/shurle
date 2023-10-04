@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
@@ -127,6 +128,7 @@ var links = make(map[string]string)
 
 func SetupRouter(prefix string, sugar *zap.SugaredLogger) *gin.Engine {
 	r := gin.Default()
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.GET("/:idvalue", MWGetOriginURL(sugar))
 	r.POST("/", MWPostServeURL(prefix, sugar))
 	r.POST("/:сrutch0/", MWPostServeURL(prefix, sugar))

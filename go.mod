@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/caarlos0/env/v9 v9.0.0
+	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
