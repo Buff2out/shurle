@@ -64,6 +64,11 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		if err = json.Unmarshal(b, &reqJSONexmpl); err != nil {
 			panic(err)
 		}
+		sugar.Infow(
+			"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", reqJSONexmpl,
+			"b = ", string(b),
+			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+		)
 		// конец фрагмента
 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
