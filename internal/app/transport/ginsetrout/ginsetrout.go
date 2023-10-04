@@ -1,7 +1,6 @@
 package ginsetrout
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -50,15 +49,14 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 		id := shserv.GetRandomHash()
-		b, err := io.ReadAll(c.Request.Body)
-
+		//b, err := io.ReadAll(c.Request.Body)
+		//if err != nil {
+		//	panic(err)
+		//}
 		var reqJSON shortener.OriginURL
 		var respJSON shortener.Shlink
 
-		if err != nil {
-			panic(err)
-		}
-		if err = json.Unmarshal(b, &reqJSON); err != nil {
+		if err := c.BindJSON(&reqJSON); err != nil {
 			panic(err)
 		}
 		// Записываем хеш в ассоциатор с урлом
