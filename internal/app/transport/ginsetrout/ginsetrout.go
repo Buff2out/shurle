@@ -1,6 +1,7 @@
 package ginsetrout
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -49,14 +50,25 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 		id := shserv.GetRandomHash()
-		//b, err := io.ReadAll(c.Request.Body)
-		//if err != nil {
-		//	panic(err)
-		//}
+
+		// на деле этот фрагмент кода бессмысленен
+		b, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			panic(err)
+		}
+		// конец фрагмента
 		var reqJSON shortener.OriginURL
 		var respJSON shortener.Shlink
 
-		if err := c.BindJSON(&reqJSON); err != nil {
+		// на деле этот фрагмент кода бессмысленен
+		if err = json.Unmarshal(b, &reqJSON); err != nil {
+			panic(err)
+		}
+		// конец фрагмента
+
+		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
+		// Без фрагментов выше тест не принимает :(
+		if err = c.BindJSON(&reqJSON); err != nil {
 			panic(err)
 		}
 		// Записываем хеш в ассоциатор с урлом
