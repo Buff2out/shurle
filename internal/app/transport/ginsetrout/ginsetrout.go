@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -50,37 +51,42 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 		id := shserv.GetRandomHash()
-
-		// на деле этот фрагмент кода бессмысленен
-		b, err := io.ReadAll(c.Request.Body)
-		if err != nil {
-			panic(err)
-		}
-		// конец фрагмента
-		var reqJSONexmpl shortener.OriginURL
-		var respJSON shortener.Shlink
-
-		// на деле этот фрагмент кода бессмысленен
-		if err = json.Unmarshal(b, &reqJSONexmpl); err != nil {
-			panic(err)
-		}
-		sugar.Infow(
-			"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", reqJSONexmpl,
-			"b = ", string(b),
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
-		)
-		// конец фрагмента
+		//// на деле этот фрагмент кода бессмысленен
+		//var reqJSONexmpl shortener.OriginURL
+		//b, err := io.ReadAll(c.Request.Body)
+		//if err != nil {
+		//	panic(err)
+		//}
+		//if err = json.Unmarshal(b, &reqJSONexmpl); err != nil {
+		//	panic(err)
+		//}
+		//sugar.Infow(
+		//	"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", reqJSONexmpl,
+		//	"b = ", string(b),
+		//	"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+		//)
+		//// конец фрагмента
 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
 		// Без фрагментов выше тест не принимает :(
 		var reqJSON shortener.OriginURL
-		if err = c.BindJSON(&reqJSON); err != nil {
+		if err := c.BindJSON(&reqJSON); err != nil {
 			panic(err)
 		}
+		// Ниже логгируем Json иначе тест не примет
+		out, err := json.Marshal(reqJSON)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sugar.Infow(
+			"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out,
+		)
+
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
 
 		// формируем ответ
+		var respJSON shortener.Shlink
 		respJSON.Result = fmt.Sprintf(`%s%s%s`, prefix, `/`, id)
 		//out, err := json.MarshalIndent(respJSON, "", "   ")
 		//if err != nil {
