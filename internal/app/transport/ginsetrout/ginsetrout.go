@@ -68,9 +68,8 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		//// конец фрагмента
 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
-		// Без фрагментов выше тест не принимает :(
 		var reqJSON shortener.OriginURL
-		if err := c.BindJSON(&reqJSON); err != nil {
+		if err := c.ShouldBindJSON(&reqJSON); err != nil {
 			panic(err)
 		}
 		// Ниже логгируем Json иначе тест не примет
