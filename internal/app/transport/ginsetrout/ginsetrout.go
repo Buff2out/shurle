@@ -103,6 +103,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 //	}
 //}
 
+// здесь нужно вручную установить нормальный location
 func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 	// миддлварь, логгируем что хотим
 	timeStartingServer := time.Now()
@@ -112,8 +113,16 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 	)
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
-		id := c.Params.ByName("idvalue")
 
+		id := c.Params.ByName("idvalue")
+		sugar.Infow(
+			"\"Location\", id", "id = ", id,
+			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+		)
+		sugar.Infow(
+			"\"Location\", links[id]", "links[id] = ", links[id],
+			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+		)
 		c.Header("Location", links[id])
 		c.String(http.StatusTemporaryRedirect, links[id])
 		timeEndingRequest := time.Now()
