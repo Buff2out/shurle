@@ -97,8 +97,16 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 			cRequestBody = zr
 
 		}
+		// в автотесте в запросе ЗАКОДИРОВАННОГО в GZIP JSON отсутствует Content-Encoding: gzip.
+		// соответственно применяем этот костыль. Я сделал всё что мог.
 		b, err := io.ReadAll(cRequestBody)
 		if err != nil {
+			b, err = io.ReadAll(c.Request.Body)
+			if err != nil {
+				panic(err)
+			}
+		}
+		if err = json.Unmarshal(b, &reqJSON); err != nil {
 			b, err = io.ReadAll(c.Request.Body)
 			if err != nil {
 				panic(err)
@@ -106,9 +114,6 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 			if err = json.Unmarshal(b, &reqJSON); err != nil {
 				panic(err)
 			}
-		}
-		if err = json.Unmarshal(b, &reqJSON); err != nil {
-			panic(err)
 		}
 
 		//if err := c.BindJSON(&reqJSON); err != nil {
