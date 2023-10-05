@@ -83,6 +83,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		sugar.Infow(
 			"?GZIPED request?", "content-enc", c.Request.Header.Get("Content-Encoding"), "accept-enc", c.Request.Header.Get("Accept-Encoding"),
 		)
+		cRequestBody := c.Request.Body
 		if strings.Contains(c.Request.Header.Get("Accept-Encoding"), "gzip") {
 			sugar.Infow(
 				"GZIPED request",
@@ -98,13 +99,17 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 			//if err = json.Unmarshal(b, &reqJSON); err != nil {
 			//	panic(err)
 			//}
+
 			// как в алисе
 			c.Request.Body = zr
 
 		}
 
 		if err := c.BindJSON(&reqJSON); err != nil {
-			panic(err)
+			c.Request.Body = cRequestBody
+			if err = c.BindJSON(&reqJSON); err != nil {
+				panic(err)
+			}
 		}
 		// Ниже логгируем Json иначе тест не примет
 		out, err := json.Marshal(reqJSON)
