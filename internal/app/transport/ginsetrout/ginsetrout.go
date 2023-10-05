@@ -92,25 +92,31 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 			if err != nil {
 				panic(err)
 			}
-			//b, err := io.ReadAll(zr)
-			//if err != nil {
-			//	panic(err)
-			//}
-			//if err = json.Unmarshal(b, &reqJSON); err != nil {
-			//	panic(err)
-			//}
 
 			// как в алисе
-			c.Request.Body = zr
+			cRequestBody = zr
 
 		}
-
-		if err := c.BindJSON(&reqJSON); err != nil {
-			c.Request.Body = cRequestBody
-			if err = c.BindJSON(&reqJSON); err != nil {
+		b, err := io.ReadAll(cRequestBody)
+		if err != nil {
+			b, err = io.ReadAll(c.Request.Body)
+			if err != nil {
+				panic(err)
+			}
+			if err = json.Unmarshal(b, &reqJSON); err != nil {
 				panic(err)
 			}
 		}
+		if err = json.Unmarshal(b, &reqJSON); err != nil {
+			panic(err)
+		}
+
+		//if err := c.BindJSON(&reqJSON); err != nil {
+		//	c.Request.Body = cRequestBody
+		//	if err = c.BindJSON(&reqJSON); err != nil {
+		//		panic(err)
+		//	}
+		//}
 		// Ниже логгируем Json
 		//иначе тест не примет
 		out, err := json.Marshal(reqJSON)
