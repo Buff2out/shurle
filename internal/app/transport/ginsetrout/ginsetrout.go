@@ -2,7 +2,6 @@ package ginsetrout
 
 import (
 	cgzip "compress/gzip"
-	"encoding/json"
 	"fmt"
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -12,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,14 +20,14 @@ type NetAddress struct {
 	Port string
 }
 
-type gzreadCloser struct {
-	*cgzip.Reader
-	io.Closer
-}
-
-func (gz gzreadCloser) Close() error {
-	return gz.Closer.Close()
-}
+//type gzreadCloser struct {
+//	*cgzip.Reader
+//	io.Closer
+//}
+//
+//func (gz gzreadCloser) Close() error {
+//	return gz.Closer.Close()
+//}
 
 func MWPostServeURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) { // mw - не nfs most wanted, а MiddleWare
 	// наконец-то норм мидлварь, делаем до ретёрна что хотим
@@ -79,9 +79,9 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
 		var reqJSON shortener.OriginURL
 		sugar.Infow(
-			"?GZIPED request?", "content-enc", c.GetHeader("Content-Encoding"), "accept-enc", c.GetHeader("Accept-Encoding"),
+			"?GZIPED request?", "content-enc", c.Request.Header.Get("Content-Encoding"), "accept-enc", c.Request.Header.Get("Accept-Encoding"),
 		)
-		if c.GetHeader("Accept-Encoding") == "gzip" || c.GetHeader("Content-Encoding") == "gzip" {
+		if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
 			sugar.Infow(
 				"GZIPED request",
 			)
@@ -89,35 +89,21 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 			if err != nil {
 				panic(err)
 			}
-			// потом вынесу это в отдельный метод/функ
-			// remember DRY
-			b, err := io.ReadAll(zr)
-			if err != nil {
-				panic(err)
-			}
-			if err = json.Unmarshal(b, &reqJSON); err != nil {
-				panic(err)
-			}
-			c.Request.Body = gzreadCloser{zr, c.Request.Body}
+			//b, err := io.ReadAll(zr)
+			//if err != nil {
+			//	panic(err)
+			//}
+			//if err = json.Unmarshal(b, &reqJSON); err != nil {
+			//	panic(err)
+			//}
+			// как в алисе
+			c.Request.Body = zr
 
-		} else {
-			// потом вынесу это в отдельный метод/функ
-			//remember DRY
-			sugar.Infow(
-				"NOT GZIPED request",
-			)
-			b, err := io.ReadAll(c.Request.Body)
-			if err != nil {
-				panic(err)
-			}
-			if err = json.Unmarshal(b, &reqJSON); err != nil {
-				panic(err)
-			}
 		}
 
-		//if err := c.BindJSON(&reqJSON); err != nil {
-		//	panic(err)
-		//}
+		if err := c.BindJSON(&reqJSON); err != nil {
+			panic(err)
+		}
 		//// Ниже логгируем Json иначе тест не примет
 		//out, err := json.Marshal(reqJSON)
 		//if err != nil {
@@ -141,7 +127,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		timeEndingRequest := time.Now()
 		sugar.Infow(
 			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+			"StatusCode", strconv.Itoa(http.StatusCreated),
 		)
 	}
 }
