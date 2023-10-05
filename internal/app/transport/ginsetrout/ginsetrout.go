@@ -1,6 +1,7 @@
 package ginsetrout
 
 import (
+	"bytes"
 	cgzip "compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -135,6 +136,26 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
+		sugar.Infow(
+			"reqJSON.URL first 4 symbols", "reqJSON.URL[:4] = ", reqJSON.URL[:4],
+		)
+		if reqJSON.URL[:4] != "http" {
+			reader := bytes.NewReader([]byte(reqJSON.URL))
+			gzreader, e1 := cgzip.NewReader(reader)
+			if e1 != nil {
+				panic(e1) // Maybe panic here, depends on your error handling.
+			}
+
+			output, e2 := io.ReadAll(gzreader)
+			if e2 != nil {
+				panic(e2)
+			}
+			links[id] = string(output)
+			reqJSON.URL = string(output)
+			sugar.Infow(
+				"in IF block links[id]", "links[id] = ", links[id],
+			)
+		}
 
 		// формируем ответ
 		var respJSON shortener.Shlink
