@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -80,31 +79,50 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
 		var reqJSON shortener.OriginURL
 		if c.GetHeader("Content-Encoding") == "gzip" {
+			sugar.Infow(
+				"GZIPED request",
+			)
 			zr, err := cgzip.NewReader(c.Request.Body)
 			if err != nil {
 				panic(err)
 			}
+			// потом вынесу это в отдельный метод/функ
+			//remember DRY
+			b, err := io.ReadAll(zr)
+			if err != nil {
+				panic(err)
+			}
+			if err = json.Unmarshal(b, &reqJSON); err != nil {
+				panic(err)
+			}
 			c.Request.Body = gzreadCloser{zr, c.Request.Body}
-		}
-		b, err := io.ReadAll(c.Request.Body)
-		if err != nil {
-			panic(err)
-		}
-		if err = json.Unmarshal(b, &reqJSON); err != nil {
-			panic(err)
+
+		} else {
+			// потом вынесу это в отдельный метод/функ
+			//remember DRY
+			sugar.Infow(
+				"NOT GZIPED request",
+			)
+			b, err := io.ReadAll(c.Request.Body)
+			if err != nil {
+				panic(err)
+			}
+			if err = json.Unmarshal(b, &reqJSON); err != nil {
+				panic(err)
+			}
 		}
 
 		//if err := c.BindJSON(&reqJSON); err != nil {
 		//	panic(err)
 		//}
-		// Ниже логгируем Json иначе тест не примет
-		out, err := json.Marshal(reqJSON)
-		if err != nil {
-			log.Fatal(err)
-		}
-		sugar.Infow(
-			"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out,
-		)
+		//// Ниже логгируем Json иначе тест не примет
+		//out, err := json.Marshal(reqJSON)
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//sugar.Infow(
+		//	"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out,
+		//)
 
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
