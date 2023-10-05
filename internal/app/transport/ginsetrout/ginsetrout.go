@@ -78,6 +78,9 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
 		var reqJSON shortener.OriginURL
+		sugar.Infow(
+			"?GZIPED request?", "content-enc", c.GetHeader("Content-Encoding"),
+		)
 		if c.GetHeader("Content-Encoding") == "gzip" {
 			sugar.Infow(
 				"GZIPED request",
