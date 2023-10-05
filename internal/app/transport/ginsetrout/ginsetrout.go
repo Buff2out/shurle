@@ -83,8 +83,12 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		sugar.Infow(
 			"?GZIPED request?", "content-enc", c.Request.Header.Get("Content-Encoding"), "accept-enc", c.Request.Header.Get("Accept-Encoding"),
 		)
-		cRequestBody := c.Request.Body
-		if strings.Contains(c.Request.Header.Get("Accept-Encoding"), "gzip") {
+
+		//cRequestBody := c.Request.Body
+
+		// в автотесте в запросе ЗАКОДИРОВАННОГО в GZIP JSON отсутствует Content-Encoding: gzip.
+		// соответственно применяем этот костыль. Я сделал всё что мог.
+		if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
 			sugar.Infow(
 				"GZIPED request",
 			)
@@ -94,34 +98,31 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 			}
 
 			// как в алисе
-			cRequestBody = zr
+			c.Request.Body = zr
 
 		}
-		// в автотесте в запросе ЗАКОДИРОВАННОГО в GZIP JSON отсутствует Content-Encoding: gzip.
-		// соответственно применяем этот костыль. Я сделал всё что мог.
-		b, err := io.ReadAll(cRequestBody)
-		if err != nil {
-			b, err = io.ReadAll(c.Request.Body)
-			if err != nil {
-				panic(err)
-			}
-		}
-		if err = json.Unmarshal(b, &reqJSON); err != nil {
-			b, err = io.ReadAll(c.Request.Body)
-			if err != nil {
-				panic(err)
-			}
-			if err = json.Unmarshal(b, &reqJSON); err != nil {
-				panic(err)
-			}
-		}
-
-		//if err := c.BindJSON(&reqJSON); err != nil {
-		//	c.Request.Body = cRequestBody
-		//	if err = c.BindJSON(&reqJSON); err != nil {
+		//// в автотесте в запросе ЗАКОДИРОВАННОГО в GZIP JSON отсутствует Content-Encoding: gzip.
+		//// соответственно применяем этот костыль. Я сделал всё что мог.
+		//b, err := io.ReadAll(cRequestBody)
+		//if err != nil {
+		//	b, err = io.ReadAll(c.Request.Body)
+		//	if err != nil {
 		//		panic(err)
 		//	}
 		//}
+		//if err = json.Unmarshal(b, &reqJSON); err != nil {
+		//	b, err = io.ReadAll(c.Request.Body)
+		//	if err != nil {
+		//		panic(err)
+		//	}
+		//	if err = json.Unmarshal(b, &reqJSON); err != nil {
+		//		panic(err)
+		//	}
+		//}
+
+		if err := c.BindJSON(&reqJSON); err != nil {
+			panic(err)
+		}
 		// Ниже логгируем Json
 		//иначе тест не примет
 		out, err := json.Marshal(reqJSON)
