@@ -2,6 +2,7 @@ package ginsetrout
 
 import (
 	cgzip "compress/gzip"
+	"encoding/json"
 	"fmt"
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -9,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -104,14 +106,14 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		if err := c.BindJSON(&reqJSON); err != nil {
 			panic(err)
 		}
-		//// Ниже логгируем Json иначе тест не примет
-		//out, err := json.Marshal(reqJSON)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//sugar.Infow(
-		//	"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out,
-		//)
+		// Ниже логгируем Json иначе тест не примет
+		out, err := json.Marshal(reqJSON)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sugar.Infow(
+			"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out,
+		)
 
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
