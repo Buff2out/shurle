@@ -83,7 +83,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 		sugar.Infow(
 			"?GZIPED request?", "content-enc", c.Request.Header.Get("Content-Encoding"), "accept-enc", c.Request.Header.Get("Accept-Encoding"),
 		)
-		if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
+		if strings.Contains(c.Request.Header.Get("Accept-Encoding"), "gzip") {
 			sugar.Infow(
 				"GZIPED request",
 			)
