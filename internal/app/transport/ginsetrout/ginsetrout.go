@@ -111,7 +111,8 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 				panic(err)
 			}
 		}
-		// Ниже логгируем Json иначе тест не примет
+		// Ниже логгируем Json
+		//иначе тест не примет
 		out, err := json.Marshal(reqJSON)
 		if err != nil {
 			log.Fatal(err)
