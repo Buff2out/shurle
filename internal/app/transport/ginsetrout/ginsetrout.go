@@ -136,6 +136,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
+
 		sugar.Infow(
 			"reqJSON.URL first 4 symbols", "reqJSON.URL[:4] = ", reqJSON.URL[:4],
 		)
@@ -209,6 +210,23 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 
 		id := c.Params.ByName("idvalue")
+
+		if links[id] != "http" {
+			reader := bytes.NewReader([]byte(links[id]))
+			gzreader, e1 := cgzip.NewReader(reader)
+			if e1 != nil {
+				panic(e1) // Maybe panic here, depends on your error handling.
+			}
+
+			output, e2 := io.ReadAll(gzreader)
+			if e2 != nil {
+				panic(e2)
+			}
+			links[id] = string(output)
+			sugar.Infow(
+				"in IF block links[id]", "links[id] = ", links[id],
+			)
+		}
 		sugar.Infow(
 			"\"Location\", id", "id = ", id,
 			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
@@ -217,6 +235,7 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 			"\"Location\", links[id]", "links[id] = ", links[id],
 			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
 		)
+
 		c.Header("Location", links[id])
 		c.String(http.StatusTemporaryRedirect, links[id])
 		timeEndingRequest := time.Now()
