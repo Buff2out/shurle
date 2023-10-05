@@ -211,7 +211,7 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 
 		id := c.Params.ByName("idvalue")
 
-		if links[id] != "http" {
+		if links[id][:4] != "http" {
 			reader := bytes.NewReader([]byte(links[id]))
 			gzreader, e1 := cgzip.NewReader(reader)
 			if e1 != nil {
