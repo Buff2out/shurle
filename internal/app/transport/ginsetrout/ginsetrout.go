@@ -1,6 +1,7 @@
 package ginsetrout
 
 import (
+	cgzip "compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
@@ -18,6 +19,15 @@ import (
 type NetAddress struct {
 	Host string
 	Port string
+}
+
+type gzreadCloser struct {
+	*cgzip.Reader
+	io.Closer
+}
+
+func (gz gzreadCloser) Close() error {
+	return gz.Closer.Close()
 }
 
 func MWPostServeURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) { // mw - не nfs most wanted, а MiddleWare
@@ -69,7 +79,14 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger) func(c *gin.Context) 
 
 		// А вот этот НИЖЕ - ключевой фрагмент, в котором используется JSON.
 		var reqJSON shortener.OriginURL
-		if err := c.ShouldBindJSON(&reqJSON); err != nil {
+		if c.GetHeader("Content-Encoding") == "gzip" {
+			zr, err := cgzip.NewReader(c.Request.Body)
+			if err != nil {
+				panic(err)
+			}
+			c.Request.Body = gzreadCloser{zr, c.Request.Body}
+		}
+		if err := c.BindJSON(&reqJSON); err != nil {
 			panic(err)
 		}
 		// Ниже логгируем Json иначе тест не примет
