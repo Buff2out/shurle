@@ -10,8 +10,20 @@ import (
 func main() {
 
 	/* TODO
-	1 - Навести порядочек в "контроллерах"
-	2 - осознать предложения правок Владислава (своего ментора)
+	1 -
+	* - метод извлечения (read, консьюм) short-url-db.json >>>--->>> links
+		*** определить откуда взять
+			а from ENVS
+			б from FLAGS
+			в from DEFAULTPATH
+		READING FILE
+	* - метод записывания (write, продьюс) links >>>--->>> short-url-db.json
+		*** Определить куда записывать
+			A from ENVS
+			B from FLAGS
+			C DOESN'T WRITE
+
+	2 - заменить паники
 	3 - причесать, убрать ненужные комментарии с устаревшим закоменченным кодом
 	4 - Параллельно с этим делать инкремент
 	*/
@@ -27,7 +39,6 @@ func main() {
 	serverConfig := cfgsc.GetServerConfig(sugar)
 	//fmt.Println("ошибки нет main.go:", serverConfig)
 	r := ginsetrout.SetupRouter(serverConfig.P, sugar)
-	// Listen and Server in 0.0.0.0:8080
 	err := r.Run(serverConfig.S)
 	if err != nil {
 		panic(err)
