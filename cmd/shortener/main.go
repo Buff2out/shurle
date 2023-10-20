@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/Buff2out/shurle/internal"
 	lg "github.com/Buff2out/shurle/internal/app/config/logging"
-	"github.com/Buff2out/shurle/internal/app/services/cfgsc"
 	"github.com/Buff2out/shurle/internal/app/transport/ginsetrout"
 	"go.uber.org/zap"
 )
@@ -36,10 +36,11 @@ func main() {
 			panic("cannot close zap's sugared logger")
 		}
 	}(logger)
-	serverConfig := cfgsc.GetServerConfig(sugar)
+	//serverConfig := cfgsc.GetServerConfig(sugar)
+	settings := internal.GetSettings(sugar)
 	//fmt.Println("ошибки нет main.go:", serverConfig)
-	r := ginsetrout.SetupRouter(serverConfig.P, sugar)
-	err := r.Run(serverConfig.S)
+	r := ginsetrout.SetupRouter(settings, sugar)
+	err := r.Run(settings.Socket)
 	if err != nil {
 		panic(err)
 	}

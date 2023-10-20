@@ -69,12 +69,12 @@ func (p *Producer) WriteEvent(event *Event.ShURLFile) error {
 	}
 
 	// записываем событие в буфер
-	if _, err := p.writer.Write(data); err != nil {
+	if _, err = p.writer.Write(data); err != nil {
 		return err
 	}
 
 	// добавляем перенос строки
-	if err := p.writer.WriteByte('\n'); err != nil {
+	if err = p.writer.WriteByte('\n'); err != nil {
 		return err
 	}
 

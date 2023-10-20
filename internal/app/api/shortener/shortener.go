@@ -9,7 +9,7 @@ type Shlink struct {
 }
 
 type ShURLFile struct {
-	UId         string `json:"uid"`
+	UID         string `json:"uuid"`
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
