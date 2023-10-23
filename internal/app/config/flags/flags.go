@@ -2,7 +2,7 @@ package flags
 
 import (
 	"flag"
-	"github.com/Buff2out/shurle/internal"
+	"github.com/Buff2out/shurle/internal/app/api/shortener"
 )
 
 // НУЖНО ВЫНЕСТИ internal.Settings В shortener!!!
@@ -19,9 +19,9 @@ func init() {
 	ShURLsFile = flag.String("f", ``, "Filepath flag")
 }
 
-func GetFlags() *internal.Settings {
+func GetFlags() *shortener.Settings {
 	flag.Parse()
-	return &internal.Settings{
+	return &shortener.Settings{
 		Socket:     *Socket,
 		Prefix:     *Prefix,
 		ShURLsJSON: *ShURLsFile,

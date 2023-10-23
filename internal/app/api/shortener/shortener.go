@@ -13,3 +13,9 @@ type ShURLFile struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
+
+type Settings struct {
+	Socket     string `env:"SERVER_ADDRESS,required"`
+	Prefix     string `env:"BASE_URL,required"`
+	ShURLsJSON string `env:"FILE_STORAGE_PATH,required"`
+}

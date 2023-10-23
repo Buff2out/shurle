@@ -3,6 +3,7 @@ package files
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
 	"os"
 )
@@ -48,7 +49,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 func (c *Consumer) ReadEvent() (*Event.ShURLFile, error) {
 	// одиночное сканирование до следующей строки
 	if !c.scanner.Scan() {
-		return nil, c.scanner.Err()
+		return nil, fmt.Errorf("КОНЕЦ СТРОКИ")
 	}
 	// читаем данные из scanner
 	data := c.scanner.Bytes()

@@ -5,7 +5,6 @@ import (
 	cgzip "compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/Buff2out/shurle/internal"
 	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
 	"github.com/Buff2out/shurle/internal/app/config/files"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -230,12 +229,12 @@ func fillEvents(sugar *zap.SugaredLogger, file string) {
 	// временно заполню линкс отсюда
 	for {
 		sugar.Infow(
-			"in fillEvents failed BEFORE el, er := c.ReadEvent()", "file", file,
+			"info about path of file", "file", file,
 		)
 		el, er := c.ReadEvent()
 		if er != nil {
 			sugar.Infow(
-				"in fillEvents failed el, er := c.ReadEvent()",
+				"END OF FILE", "element", el,
 			)
 			break
 		}
@@ -246,7 +245,7 @@ func fillEvents(sugar *zap.SugaredLogger, file string) {
 
 var links = make(map[string]string)
 
-func SetupRouter(settings *internal.Settings, sugar *zap.SugaredLogger) *gin.Engine {
+func SetupRouter(settings *Event.Settings, sugar *zap.SugaredLogger) *gin.Engine {
 
 	// Здесь временно (потому что это будет некрасиво, поэтому временно)
 	// проинициализируем links из файлов.
