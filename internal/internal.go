@@ -21,13 +21,12 @@ func GetSettings(sugar *zap.SugaredLogger) *shortener.Settings {
 func filterEmptyVals(sugar *zap.SugaredLogger, settingsEnvs *shortener.Settings) *shortener.Settings {
 	settingsEnvsMap := structs.Map(settingsEnvs)
 	settingsFlagsMap := structs.Map(flags.GetFlags())
-	for key, _ := range settingsEnvsMap {
+	for key := range settingsEnvsMap {
 		if settingsEnvsMap[key] == "" {
 			sugar.Infow("Got Key from FLAGS", key, settingsFlagsMap[key])
 			settingsEnvsMap[key] = settingsFlagsMap[key]
 		}
 	}
-	sugar.Infow("Type of stringconverted")
 	return &shortener.Settings{
 		Socket:     fmt.Sprintf("%v", settingsEnvsMap["Socket"]),
 		Prefix:     fmt.Sprintf("%v", settingsEnvsMap["Prefix"]),
