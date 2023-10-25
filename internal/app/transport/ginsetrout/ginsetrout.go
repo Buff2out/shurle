@@ -52,7 +52,7 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 		links[id] = string(b)
 		event := Event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		if filename != "" {
-			p, er := files.NewProducer(filename)
+			p, er := files.NewProducer(filename, sugar)
 			if er != nil {
 				sugar.Infow("In MWPostAPIURL func under event var. Invalid path to file.")
 			}
@@ -115,7 +115,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 		)
 		event := Event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		if filename != "" {
-			p, er := files.NewProducer(filename)
+			p, er := files.NewProducer(filename, sugar)
 			if er != nil {
 				sugar.Infow("In MWPostAPIURL func under event var. Invalid path to file.")
 			}
@@ -220,26 +220,26 @@ func fillEvents(sugar *zap.SugaredLogger, file string) {
 	if file == "" {
 		file = filepath.Join(os.TempDir(), "short-url-db.json")
 	}
-	c, err := files.NewConsumer(file)
+	c, err := files.NewConsumer(file, sugar)
 	if err != nil {
 		sugar.Infow(
 			"in fillEvents failed",
 		)
-	}
-	// временно заполню линкс отсюда
-	for {
-		sugar.Infow(
-			"info about path of file", "file", file,
-		)
-		el, er := c.ReadEvent()
-		if er != nil {
+	} else {
+		for {
 			sugar.Infow(
-				"END OF FILE", "element", el,
+				"info about path of file", "file", file,
 			)
-			break
+			el, er := c.ReadEvent()
+			if er != nil {
+				sugar.Infow(
+					"END OF FILE", "element", el,
+				)
+				break
+			}
+			events = append(events, *el) // мда, теперь это events атавизм
+			links[el.ShortURL] = el.OriginalURL
 		}
-		events = append(events, *el) // мда, теперь это events атавизм
-		links[el.ShortURL] = el.OriginalURL
 	}
 }
 

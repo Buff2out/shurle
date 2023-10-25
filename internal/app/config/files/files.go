@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	"go.uber.org/zap"
 	"os"
 )
 
@@ -20,9 +21,10 @@ type Consumer struct {
 	scanner *bufio.Scanner
 }
 
-func NewProducer(filename string) (*Producer, error) {
+func NewProducer(filename string, sugar *zap.SugaredLogger) (*Producer, error) {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
+		sugar.Infow("Is file not created?? WTF ", "errorMsg ", err)
 		return nil, err
 	}
 
@@ -33,9 +35,10 @@ func NewProducer(filename string) (*Producer, error) {
 	}, nil
 }
 
-func NewConsumer(filename string) (*Consumer, error) {
+func NewConsumer(filename string, sugar *zap.SugaredLogger) (*Consumer, error) {
 	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
+		sugar.Infow("Is file not created?? WTF ", "errorMsg ", err)
 		return nil, err
 	}
 
