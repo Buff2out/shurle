@@ -216,7 +216,7 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 }
 
 func fillEvents(sugar *zap.SugaredLogger, file string) {
-	var events = make([]Event.ShURLFile, 0, 5) // мда, теперь это events атавизм
+	//var events = make([]Event.ShURLFile, 0, 5) // мда, теперь это events атавизм
 	if file == "" {
 		file = filepath.Join(os.TempDir(), "short-url-db.json")
 	}
@@ -237,7 +237,7 @@ func fillEvents(sugar *zap.SugaredLogger, file string) {
 				)
 				break
 			}
-			events = append(events, *el) // мда, теперь это events атавизм
+			//events = append(events, *el) // мда, теперь это events атавизм
 			links[el.ShortURL] = el.OriginalURL
 		}
 	}
