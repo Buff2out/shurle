@@ -29,5 +29,10 @@ func filterEmptyVals(sugar *zap.SugaredLogger, settingsEnvs *shortener.Settings)
 			settingsEnvsMap[key] = settingsFlagsMap[key]
 		}
 	}
-	return settingsEnvs
+	sugar.Infow("Type of stringconverted")
+	return &shortener.Settings{
+		Socket:     fmt.Sprintf("%v", settingsEnvsMap["Socket"]),
+		Prefix:     fmt.Sprintf("%v", settingsEnvsMap["Prefix"]),
+		ShURLsJSON: fmt.Sprintf("%v", settingsEnvsMap["ShURLsJSON"]),
+	}
 }
