@@ -19,10 +19,8 @@ func GetSettings(sugar *zap.SugaredLogger) *shortener.Settings {
 }
 
 func filterEmptyVals(sugar *zap.SugaredLogger, settingsEnvs *shortener.Settings) *shortener.Settings {
-	settingsFlags := flags.GetFlags()
 	settingsEnvsMap := structs.Map(settingsEnvs)
-	settingsFlagsMap := structs.Map(settingsFlags)
-	fmt.Println(settingsEnvsMap)
+	settingsFlagsMap := structs.Map(flags.GetFlags())
 	for key, _ := range settingsEnvsMap {
 		if settingsEnvsMap[key] == "" {
 			sugar.Infow("Got Key from FLAGS", key, settingsFlagsMap[key])
