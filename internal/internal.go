@@ -13,7 +13,7 @@ func GetSettings(sugar *zap.SugaredLogger) *shortener.Settings {
 	var settingsEnvs shortener.Settings
 	err := env.Parse(&settingsEnvs)
 	if err != nil {
-		settingsEnvs = *filterEmptyVals(sugar, &settingsEnvs)
+		return filterEmptyVals(sugar, &settingsEnvs)
 	}
 	return &settingsEnvs
 }
