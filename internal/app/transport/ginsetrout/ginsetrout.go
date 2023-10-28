@@ -7,6 +7,7 @@ import (
 	"fmt"
 	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
 	"github.com/Buff2out/shurle/internal/app/config/files"
+	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -87,7 +88,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 			)
 			zr, err := cgzip.NewReader(c.Request.Body)
 			if err != nil {
-				panic(err)
+				sugar.Infow("Error to create gzipped reader body", "nameErr", err)
 			}
 
 			// как в алисе
@@ -96,7 +97,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 		}
 
 		if err := c.BindJSON(&reqJSON); err != nil {
-			panic(err)
+			sugar.Infow("error in binding json", "nameError", err)
 		}
 		// Ниже логгируем Json
 		//иначе тест не примет
@@ -114,26 +115,11 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 			"reqJSON.URL first 4 symbols", "reqJSON.URL[:4] = ", reqJSON.URL[:4],
 		)
 		event := Event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
-		if filename != "" {
-			p, er := files.NewProducer(filename, sugar)
-			if er != nil {
-				sugar.Infow("In MWPostAPIURL func under event var. Invalid path to file.")
-			}
-			er = p.WriteEvent(&event)
-			if er != nil {
-				sugar.Infow("In MWPostAPIURL func under WriteEvent. Cant Write to file.")
-			}
-		}
-
-		// выше логику тоже нужно вынести в функцию...
+		filesc.AddNote(sugar, event, filename)
 
 		// формируем ответ
 		var respJSON Event.Shlink
 		respJSON.Result = fmt.Sprintf(`%s%s%s`, prefix, `/`, id)
-		//out, err := json.MarshalIndent(respJSON, "", "   ")
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
 		c.JSON(http.StatusCreated, respJSON)
 		timeEndingRequest := time.Now()
 		sugar.Infow(
@@ -143,33 +129,7 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 	}
 }
 
-//func MWGetApiURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
-//	sugar.Infow(
-//		"GET api url",
-//	)
-//	return func(c *gin.Context) {
-//		timeStartingRequest := time.Now()
-//		id := c.Params.ByName("idvalue")
-//
-//		c.Header("Location", links[id])
-//		var resp Event.OriginURL
-//		resp.URL = links[id]
-//		//out, err := json.Marshal(resp)
-//		//if err != nil {
-//		//	log.Fatal(err)
-//		//}
-//		c.JSON(http.StatusTemporaryRedirect, resp)
-//		timeEndingRequest := time.Now()
-//		sugar.Infow(
-//			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
-//			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
-//		)
-//	}
-//}
-
-// здесь нужно вручную установить нормальный location
 func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
-	// миддлварь, логгируем что хотим
 	timeStartingServer := time.Now()
 	sugar.Infow(
 		"StartingServer",
@@ -198,11 +158,11 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 		}
 		sugar.Infow(
 			"\"Location\", id", "id = ", id,
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+			"StatusCode", strconv.Itoa(http.StatusCreated),
 		)
 		sugar.Infow(
 			"\"Location\", links[id]", "links[id] = ", links[id],
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+			"StatusCode", strconv.Itoa(http.StatusCreated),
 		)
 
 		c.Header("Location", links[id])
@@ -210,7 +170,7 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 		timeEndingRequest := time.Now()
 		sugar.Infow(
 			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+			"StatusCode", strconv.Itoa(http.StatusCreated),
 		)
 	}
 }
