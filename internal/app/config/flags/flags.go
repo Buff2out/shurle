@@ -5,8 +5,6 @@ import (
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
 )
 
-// НУЖНО ВЫНЕСТИ internal.Settings В shortener!!!
-
 var (
 	Socket     *string
 	Prefix     *string

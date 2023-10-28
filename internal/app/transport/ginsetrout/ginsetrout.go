@@ -2,7 +2,7 @@ package ginsetrout
 
 import (
 	"fmt"
-	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	event "github.com/Buff2out/shurle/internal/app/api/shortener"
 	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -32,8 +32,8 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 			panic(err)
 		}
 		links[id] = string(b)
-		event := Event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
-		filesc.AddNote(sugar, event, filename)
+		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
+		filesc.AddNote(sugar, eventObj, filename)
 		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
 		timeEndingRequest := time.Now()
 		sugar.Infow(
@@ -54,10 +54,10 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
 		sugar.Infow("reqJSON.URL first 4 symbols", "reqJSON.URL[:4] = ", reqJSON.URL[:4])
-		event := Event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
-		filesc.AddNote(sugar, event, filename)
+		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
+		filesc.AddNote(sugar, eventObj, filename)
 		// формируем ответ
-		var respJSON Event.Shlink
+		var respJSON event.Shlink
 		respJSON.Result = fmt.Sprintf(`%s%s%s`, prefix, `/`, id)
 		c.JSON(http.StatusCreated, respJSON)
 		timeEndingRequest := time.Now()
@@ -91,7 +91,7 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 
 var links = make(map[string]string)
 
-func SetupRouter(settings *Event.Settings, sugar *zap.SugaredLogger) *gin.Engine {
+func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine {
 
 	// Здесь временно (потому что это будет некрасиво, поэтому временно)
 	// проинициализируем links из файлов.
