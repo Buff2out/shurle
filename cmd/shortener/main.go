@@ -10,9 +10,7 @@ import (
 func main() {
 
 	/* TODO
-	1 -
-		проверить если файла не существует, создать новый,
-		проэкспериментировать в локальном плейграунде
+	Здесь будут расписаны в дальнейшем задачи для себя
 	*/
 	sugar, logger := lg.GetSugaredLogger()
 	// это нужно добавить, если логер буферизован
@@ -23,9 +21,7 @@ func main() {
 			panic("cannot close zap's sugared logger")
 		}
 	}(logger)
-	//serverConfig := cfgsc.GetServerConfig(sugar)
 	settings := internal.GetSettings(sugar)
-	//fmt.Println("ошибки нет main.go:", serverConfig)
 	r := ginsetrout.SetupRouter(settings, sugar)
 	err := r.Run(settings.Socket)
 	if err != nil {
