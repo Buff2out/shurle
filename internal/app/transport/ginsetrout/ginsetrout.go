@@ -3,6 +3,7 @@ package ginsetrout
 import (
 	"fmt"
 	event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal/app/config/db"
 	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -89,15 +90,35 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 	}
 }
 
+func MWGetPing(sugar *zap.SugaredLogger, errorStartDb error) func(c *gin.Context) {
+	timeStartingServer := time.Now()
+	sugar.Infow("StartingServer", "Created at", timeStartingServer.String())
+	return func(c *gin.Context) {
+		timeStartingRequest := time.Now()
+		if errorStartDb != nil {
+			sugar.Errorw("Error starting db", "texterr", errorStartDb)
+			c.String(http.StatusInternalServerError, "")
+			return
+		}
+		c.String(http.StatusOK, "")
+		timeEndingRequest := time.Now()
+		sugar.Infow(
+			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
+			"StatusCode", strconv.Itoa(http.StatusCreated),
+		)
+	}
+}
+
 var links = make(map[string]string)
 
 func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine {
 
 	// Здесь временно (потому что это будет некрасиво, поэтому временно)
 	// проинициализируем links из файлов.
+	errorStartDb := db.StartDB("pgx", settings.DatabaseDSN)
 	links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
-
 	r := gin.Default()
+	r.GET("/ping", MWGetPing(sugar, errorStartDb))
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.GET("/:idvalue", MWGetOriginURL(sugar))
 	r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
