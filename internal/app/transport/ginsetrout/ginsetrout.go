@@ -1,6 +1,7 @@
 package ginsetrout
 
 import (
+	cgzip "compress/gzip"
 	"fmt"
 	event "github.com/Buff2out/shurle/internal/app/api/shortener"
 	"github.com/Buff2out/shurle/internal/app/config/db"
@@ -12,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -27,13 +29,32 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 		id := shserv.RandStringRunes(5)
+
+		if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
+			sugar.Infow(
+				"GZIPED request",
+			)
+			zr, err := cgzip.NewReader(c.Request.Body)
+			if err != nil {
+				sugar.Infow("Error to create gzipped reader body", "nameErr", err)
+			}
+
+			// как в алисе
+			c.Request.Body = zr
+
+		}
+
 		b, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			panic(err)
 		}
+		// здесь я должен предварительно декодировать стрингу, чтобы у нас не хранилось сжатое нами самими.
 		links[id] = string(b)
 		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		filesc.AddNote(sugar, eventObj, filename)
+
+		// здесь почему-то автотест не ругается, что у меня не предусмотрена возможность отправлять сжатое
+		// при Accept-Encoding: gzip. А надо бы.
 		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
 		timeEndingRequest := time.Now()
 		sugar.Infow(
