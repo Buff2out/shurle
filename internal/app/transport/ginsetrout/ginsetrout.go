@@ -90,13 +90,13 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 	}
 }
 
-func MWGetPing(sugar *zap.SugaredLogger, errorStartDb error) func(c *gin.Context) {
+func MWGetPing(sugar *zap.SugaredLogger, errorStartDB error) func(c *gin.Context) {
 	timeStartingServer := time.Now()
 	sugar.Infow("StartingServer", "Created at", timeStartingServer.String())
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
-		if errorStartDb != nil {
-			sugar.Errorw("Error starting db", "texterr", errorStartDb)
+		if errorStartDB != nil {
+			sugar.Errorw("Error starting db", "texterr", errorStartDB)
 			c.String(http.StatusInternalServerError, "")
 			return
 		}
@@ -115,10 +115,10 @@ func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine
 
 	// Здесь временно (потому что это будет некрасиво, поэтому временно)
 	// проинициализируем links из файлов.
-	errorStartDb := db.StartDB("pgx", settings.DatabaseDSN)
+	errorStartDB := db.StartDB("pgx", settings.DatabaseDSN)
 	links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
 	r := gin.Default()
-	r.GET("/ping", MWGetPing(sugar, errorStartDb))
+	r.GET("/ping", MWGetPing(sugar, errorStartDB))
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.GET("/:idvalue", MWGetOriginURL(sugar))
 	r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
