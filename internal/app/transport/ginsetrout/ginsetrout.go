@@ -7,7 +7,6 @@ import (
 	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
@@ -119,7 +118,7 @@ func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine
 	links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
 	r := gin.Default()
 	r.GET("/ping", MWGetPing(sugar, errorStartDB))
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	//r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.GET("/:idvalue", MWGetOriginURL(sugar))
 	r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	r.POST("/:сrutch0/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
