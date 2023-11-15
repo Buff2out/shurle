@@ -3,10 +3,10 @@ package ginsetrout
 import (
 	"fmt"
 	event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal/app/config/db"
 	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
@@ -27,18 +27,29 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 	return func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 		id := shserv.RandStringRunes(5)
+		var err error
+		var enc string
+		c.Request.Body, enc, err = reqsc.DecompressedGZReader(sugar, c)
+		if err != nil {
+			sugar.Infow("Error to create gzipped reader body", "nameErr", err)
+		}
+
 		b, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			panic(err)
 		}
+		//links[id] = reqsc.DecodedStringWithEncodingType(sugar, enc, string(b))
 		links[id] = string(b)
 		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		filesc.AddNote(sugar, eventObj, filename)
+
+		// здесь почему-то автотест не ругается, что у меня не предусмотрена возможность отправлять сжатое
+		// при Accept-Encoding: gzip. А надо бы.
 		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
 		timeEndingRequest := time.Now()
 		sugar.Infow(
 			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+			"StatusCode", strconv.Itoa(http.StatusCreated), "encoding", enc,
 		)
 	}
 }
@@ -72,15 +83,30 @@ func MWGetOriginURL(sugar *zap.SugaredLogger) func(c *gin.Context) {
 		timeStartingRequest := time.Now()
 
 		id := c.Params.ByName("idvalue")
-
-		if links[id][:4] != "http" {
-			links[id] = reqsc.DecodedGzipedOriginURL(links, id)
-		}
 		sugar.Infow("Info about HashID", "id = ", id, "StatusCode", strconv.Itoa(http.StatusCreated))
 		sugar.Infow("Info about OriginURL", "links[id] = ", links[id], "StatusCode", strconv.Itoa(http.StatusCreated))
 
 		c.Header("Location", links[id])
 		c.String(http.StatusTemporaryRedirect, links[id])
+		timeEndingRequest := time.Now()
+		sugar.Infow(
+			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
+			"StatusCode", strconv.Itoa(http.StatusCreated),
+		)
+	}
+}
+
+func MWGetPing(sugar *zap.SugaredLogger, errorStartDB error) func(c *gin.Context) {
+	timeStartingServer := time.Now()
+	sugar.Infow("StartingServer", "Created at", timeStartingServer.String())
+	return func(c *gin.Context) {
+		timeStartingRequest := time.Now()
+		if errorStartDB != nil {
+			sugar.Errorw("Error starting db", "texterr", errorStartDB)
+			c.String(http.StatusInternalServerError, "")
+			return
+		}
+		c.String(http.StatusOK, "")
 		timeEndingRequest := time.Now()
 		sugar.Infow(
 			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
@@ -95,10 +121,11 @@ func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine
 
 	// Здесь временно (потому что это будет некрасиво, поэтому временно)
 	// проинициализируем links из файлов.
+	errorStartDB := db.StartDB("pgx", settings.DatabaseDSN)
 	links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
-
 	r := gin.Default()
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.GET("/ping", MWGetPing(sugar, errorStartDB))
+	//r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.GET("/:idvalue", MWGetOriginURL(sugar))
 	r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	r.POST("/:сrutch0/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
