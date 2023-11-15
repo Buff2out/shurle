@@ -1,7 +1,6 @@
 package reqsc
 
 import (
-	"bytes"
 	cgzip "compress/gzip"
 	"encoding/json"
 	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
@@ -45,7 +44,7 @@ func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *Event.OriginUR
 	if err = c.BindJSON(&reqJSON); err != nil {
 		sugar.Infow("error in binding json", "nameError", err)
 	}
-	reqJSON.URL = DecodedStringWithEncodingType(sugar, enc, reqJSON.URL)
+	//reqJSON.URL = DecodedStringWithEncodingType(sugar, enc, reqJSON.URL)
 	// Ниже логгируем Json
 	//иначе тест не примет
 	out, err := json.Marshal(reqJSON)
@@ -53,7 +52,7 @@ func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *Event.OriginUR
 		log.Fatal(err)
 	}
 	sugar.Infow(
-		"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out,
+		"json.Unmarshal(b, &reqJSONexmpl)", "reqJSONexmpl = ", out, "encoding", enc,
 	)
 
 	return &reqJSON
@@ -73,25 +72,25 @@ func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *Event.OriginUR
 //	return string(output)
 //}
 
-func DecodedStringWithEncodingType(sugar *zap.SugaredLogger, enc string, str string) string {
-
-	switch enc {
-	case "default":
-		return str
-	case "gzip":
-		reader := bytes.NewReader([]byte(str))
-		gzreader, e1 := cgzip.NewReader(reader)
-		if e1 != nil {
-			// пока что лень паники переделывать под return Ошибок, так пусть пока
-			// порабоает, лучше сфокусироваться на функционале
-			panic(e1)
-		}
-		output, e2 := io.ReadAll(gzreader)
-		if e2 != nil {
-			panic(e2)
-		}
-		return string(output)
-	}
-	sugar.Infow("Error In DecodedStringWithEncodingType! THERE IS NO CASE TYPE FOUNDED")
-	return ""
-}
+//func DecodedStringWithEncodingType(sugar *zap.SugaredLogger, enc string, str string) string {
+//
+//	switch enc {
+//	case "default":
+//		return str
+//	case "gzip":
+//		reader := bytes.NewReader([]byte(str))
+//		gzreader, e1 := cgzip.NewReader(reader)
+//		if e1 != nil {
+//			// пока что лень паники переделывать под return Ошибок, так пусть пока
+//			// порабоает, лучше сфокусироваться на функционале
+//			panic(e1)
+//		}
+//		output, e2 := io.ReadAll(gzreader)
+//		if e2 != nil {
+//			panic(e2)
+//		}
+//		return string(output)
+//	}
+//	sugar.Infow("Error In DecodedStringWithEncodingType! THERE IS NO CASE TYPE FOUNDED")
+//	return ""
+//}

@@ -38,7 +38,8 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 		if err != nil {
 			panic(err)
 		}
-		links[id] = reqsc.DecodedStringWithEncodingType(sugar, enc, string(b))
+		//links[id] = reqsc.DecodedStringWithEncodingType(sugar, enc, string(b))
+		links[id] = string(b)
 		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		filesc.AddNote(sugar, eventObj, filename)
 
@@ -48,7 +49,7 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 		timeEndingRequest := time.Now()
 		sugar.Infow(
 			"THIS IS A REQUEST RESPONSE LOG", "Request duration", timeStartingRequest.Sub(timeEndingRequest).String(),
-			"StatusCode", strconv.Itoa(http.StatusCreated), // мда, а вот это уже похоже на хардкод, но пусть пока будет так.
+			"StatusCode", strconv.Itoa(http.StatusCreated), "encoding", enc,
 		)
 	}
 }
