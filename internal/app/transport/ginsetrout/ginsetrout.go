@@ -29,7 +29,7 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 		id := shserv.RandStringRunes(5)
 		var err error
 		var enc string
-		c.Request.Body, err, enc = reqsc.DecompressedGZReader(sugar, c)
+		c.Request.Body, enc, err = reqsc.DecompressedGZReader(sugar, c)
 		if err != nil {
 			sugar.Infow("Error to create gzipped reader body", "nameErr", err)
 		}

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func DecompressedGZReader(sugar *zap.SugaredLogger, c *gin.Context) (io.ReadCloser, error, string) {
+func DecompressedGZReader(sugar *zap.SugaredLogger, c *gin.Context) (io.ReadCloser, string, error) {
 	if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
 		sugar.Infow(
 			"GZIPED request",
@@ -19,14 +19,14 @@ func DecompressedGZReader(sugar *zap.SugaredLogger, c *gin.Context) (io.ReadClos
 		zr, err := cgzip.NewReader(c.Request.Body)
 		if err != nil {
 			sugar.Infow("Error to create gzipped reader body", "nameErr", err)
-			return nil, err, ""
+			return nil, "", err
 		}
 
 		// как в алисе
-		return zr, nil, "gzip"
+		return zr, "gzip", nil
 	}
 	// Опционально можно масштабировать данную функцию, если вдруг есть другие Content-Encoding
-	return c.Request.Body, nil, "default"
+	return c.Request.Body, "default", nil
 }
 
 func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *Event.OriginURL {
@@ -36,7 +36,7 @@ func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *Event.OriginUR
 	)
 	var err error
 	var enc string
-	c.Request.Body, err, enc = DecompressedGZReader(sugar, c)
+	c.Request.Body, enc, err = DecompressedGZReader(sugar, c)
 	if err != nil {
 		sugar.Infow("Error to create gzipped reader body in GetJSONRequestURL", "nameErr", err)
 	}
