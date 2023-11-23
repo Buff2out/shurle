@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-
+	// comment for testcommit
 	/* TODO
 	1 -
 		проверить если файла не существует, создать новый,
