@@ -7,16 +7,16 @@ import (
 	"time"
 )
 
-func StartDB(driver string, DSN string) error {
+func StartDB(driver string, DSN string) (*sql.DB, error) {
 	dbase, err := sql.Open(driver, DSN)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer dbase.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	if err = dbase.PingContext(ctx); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return dbase, nil
 }

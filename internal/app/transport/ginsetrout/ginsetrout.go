@@ -1,18 +1,20 @@
 package ginsetrout
 
 import (
+	"database/sql"
 	"fmt"
-	event "github.com/Buff2out/shurle/internal/app/api/shortener"
-	"github.com/Buff2out/shurle/internal/app/config/db"
-	"github.com/Buff2out/shurle/internal/app/services/filesc"
-	"github.com/Buff2out/shurle/internal/app/services/reqsc"
-	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal/app/services/filesc"
+	"github.com/Buff2out/shurle/internal/app/services/reqsc"
+	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
+	"github.com/gin-gonic/gin"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"go.uber.org/zap"
 )
 
 type NetAddress struct {
@@ -118,14 +120,22 @@ func MWGetPing(sugar *zap.SugaredLogger, errorStartDB error) func(c *gin.Context
 var links = make(map[string]string)
 
 func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine {
+	// версия без контекстов. Потому как у gin framework всё немного
+	// усложняется с (c *gin.Context) как пойму как реализовать вместе с ним TODO - переделаю
+	urlsDB, errorStartDB := sql.Open("pgx", settings.DatabaseDSN)
+	if errorStartDB != nil {
+		sugar.Infow("NO CONNECTION DB, got no parameters ", "ERR", errorStartDB, "db", urlsDB)
+	}
 
-	// Здесь временно (потому что это будет некрасиво, поэтому временно)
-	// проинициализируем links из файлов.
-	errorStartDB := db.StartDB("pgx", settings.DatabaseDSN)
+	// наконец то придумал как реализовать обратную совместимость и
+	// и впихнуть логику с бд как только стало ясно, что
+	// в переменных окружения получилось получить DSN
+	// мы просто пропишем отдельные хендлеры для них
+	// а тут сделаем проверку на то, есть ли тут databaseDSN.
+
 	links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
 	r := gin.Default()
 	r.GET("/ping", MWGetPing(sugar, errorStartDB))
-	//r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.GET("/:idvalue", MWGetOriginURL(sugar))
 	r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	r.POST("/:сrutch0/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
