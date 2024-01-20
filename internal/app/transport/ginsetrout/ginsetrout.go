@@ -9,6 +9,7 @@ import (
 	"time"
 
 	event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal/app/repositories"
 	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -125,21 +126,42 @@ func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine
 	urlsDB, errorStartDB := sql.Open("pgx", settings.DatabaseDSN)
 	if errorStartDB != nil {
 		sugar.Infow("NO CONNECTION DB, got no parameters ", "ERR", errorStartDB, "db", urlsDB)
+		links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
+		r := gin.Default()
+		// r.GET("/ping", MWGetPing(sugar, errorStartDB))
+		r.GET("/:idvalue", MWGetOriginURL(sugar))
+		r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+		r.POST("/:сrutch0/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+		r.POST("/:сrutch0/:сrutch1", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+		r.POST("/api/shorten", MWPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
+		return r
 	}
-
+	defer urlsDB.Close()
+	errExec := repositories.SQLCreateTableURLs(urlsDB)
+	if errExec != nil {
+		sugar.Infow("INVALID TRY TO EXEC", "ERR", errExec)
+		return gin.Default()
+	}
+	sugar.Infow("SUCCESS TRY TO EXEC", "ERR", errExec)
+	errInsert := repositories.SQLInsert(urlsDB)
+	if errInsert != nil {
+		sugar.Infow("INVALID TRY TO INSERT", "ERR", errInsert)
+		return gin.Default()
+	}
+	sugar.Infow("SUCCESS TRY TO INSERT", "ERR", errInsert)
 	// наконец то придумал как реализовать обратную совместимость и
 	// и впихнуть логику с бд как только стало ясно, что
 	// в переменных окружения получилось получить DSN
 	// мы просто пропишем отдельные хендлеры для них
 	// а тут сделаем проверку на то, есть ли тут databaseDSN.
 
-	links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
+	// links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
 	r := gin.Default()
-	r.GET("/ping", MWGetPing(sugar, errorStartDB))
-	r.GET("/:idvalue", MWGetOriginURL(sugar))
-	r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	r.POST("/:сrutch0/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	r.POST("/:сrutch0/:сrutch1", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	r.POST("/api/shorten", MWPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
+	// r.GET("/ping", MWGetPing(sugar, errorStartDB))
+	// r.GET("/:idvalue", DBGetDBOriginURL(sugar))
+	// r.POST("/", DBPostDBServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+	// r.POST("/:сrutch0/", DBPostDBServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+	// r.POST("/:сrutch0/:сrutch1", DBPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+	// r.POST("/api/shorten", DBPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	return r
 }
