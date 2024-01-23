@@ -1,26 +1,48 @@
 package repositories
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/Buff2out/shurle/internal/app/api/shortener"
+)
 
 func SQLCreateTableURLs(urlsDB *sql.DB) error {
 	q := `CREATE TABLE IF NOT EXISTS urls
     (
         id SERIAL PRIMARY KEY,
         short text NOT NULL,
-        origin text NOT NULL
+        origin text NOT NULL,
+		hashcode text NOT NULL
     )`
 	_, errExec := urlsDB.Exec(q)
 	return errExec
 }
 
-func SQLInsert(urlsDB *sql.DB) error {
-	b1, b2 := "bla1", "bla2"
-	_, errExec := urlsDB.Exec("INSERT INTO urls(short, origin) VALUES($1, $2)", b1, b2)
+func SQLInsertURL(DB *sql.DB, infoURL *shortener.InfoURL) error {
+	_, errExec := DB.Exec("INSERT INTO urls(short, origin, hashcode) VALUES($1, $2, $3)", infoURL.ShortURL, infoURL.OriginalURL, infoURL.HashCode)
 	return errExec
 }
 
-func SQLSelectAll(urlsDB *sql.DB) (*sql.Rows, error) {
+// новая задача. Сделать бизнес логику (методы) для структуры InfoURL
+// Вот что значит пришёл с новыми знаниями. Рефакторинг будет постепенно.
+// Ещё теперь лучше получается придумывать названия для функций. Более универсально.
+// Изначально тут было ...ByHashCode
+func SQLRetrieveByField(DB *sql.DB, hashCode string) (*sql.Rows, error) {
+	res, errQuery := DB.Query("SELECT origin FROM urls WHERE hashcode = $1", hashCode)
+	if errQuery != nil {
+		return nil, errQuery
+	}
+	return res, errQuery
+}
+
+func SQLInsertTest(DB *sql.DB) error {
+	b1, b2 := "bla1", "bla2"
+	_, errExec := DB.Exec("INSERT INTO urls(short, origin) VALUES($1, $2)", b1, b2)
+	return errExec
+}
+
+func SQLSelectAll(DB *sql.DB) (*sql.Rows, error) {
 	q := `SELECT * FROM urls`
-	result, errExec := urlsDB.Query(q)
+	result, errExec := DB.Query(q)
 	return result, errExec
 }

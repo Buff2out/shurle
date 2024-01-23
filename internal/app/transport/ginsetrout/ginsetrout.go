@@ -39,15 +39,16 @@ func MWPostServeURL(prefix string, sugar *zap.SugaredLogger, filename string) fu
 
 		b, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			panic(err)
+			panic(err) // TODO заменить панику
 		}
-		//links[id] = reqsc.DecodedStringWithEncodingType(sugar, enc, string(b))
+
+		// хм, надо подумать.
+		// три строчки ниже - это бизнес логика Save().
+		// Можем ли мы сделать некий интерфейс чтобы избежать? дублирования текущего хендлера
 		links[id] = string(b)
 		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		filesc.AddNote(sugar, eventObj, filename)
 
-		// здесь почему-то автотест не ругается, что у меня не предусмотрена возможность отправлять сжатое
-		// при Accept-Encoding: gzip. А надо бы.
 		c.String(http.StatusCreated, fmt.Sprintf(`%s%s%s`, prefix, `/`, id))
 		timeEndingRequest := time.Now()
 		sugar.Infow(
@@ -68,6 +69,8 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
 		sugar.Infow("reqJSON.URL first 4 symbols", "reqJSON.URL[:4] = ", reqJSON.URL[:4])
+
+		// две строчки ниже - бизнес логика Save()
 		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
 		filesc.AddNote(sugar, eventObj, filename)
 		// формируем ответ
@@ -123,9 +126,9 @@ var links = make(map[string]string)
 func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine {
 	// версия без контекстов. Потому как у gin framework всё немного
 	// усложняется с (c *gin.Context) как пойму как реализовать вместе с ним TODO - переделаю
-	urlsDB, errorStartDB := sql.Open("pgx", settings.DatabaseDSN)
+	DB, errorStartDB := sql.Open("pgx", settings.DatabaseDSN)
 	if errorStartDB != nil {
-		sugar.Infow("NO CONNECTION DB, got no parameters ", "ERR", errorStartDB, "db", urlsDB)
+		sugar.Infow("NO CONNECTION DB, got no parameters ", "ERR", errorStartDB, "db", DB)
 		links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
 		r := gin.Default()
 		// r.GET("/ping", MWGetPing(sugar, errorStartDB))
@@ -136,31 +139,24 @@ func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine
 		r.POST("/api/shorten", MWPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
 		return r
 	}
-	defer urlsDB.Close()
-	errExec := repositories.SQLCreateTableURLs(urlsDB)
+	// комментирую, иначе "DATABASE IS CLOSED",
+	// ведь мы выходим из сетап роутера. БД нужно в мейне прописывать"
+	// defer DB.Close()
+	errExec := repositories.SQLCreateTableURLs(DB)
 	if errExec != nil {
-		sugar.Infow("INVALID TRY TO EXEC", "ERR", errExec)
+		sugar.Infow("INVALID TRY TO CREATE TABLE", "ERR", errExec)
 		return gin.Default()
 	}
-	sugar.Infow("SUCCESS TRY TO EXEC", "ERR", errExec)
-	errInsert := repositories.SQLInsert(urlsDB)
-	if errInsert != nil {
-		sugar.Infow("INVALID TRY TO INSERT", "ERR", errInsert)
-		return gin.Default()
-	}
-	sugar.Infow("SUCCESS TRY TO INSERT", "ERR", errInsert)
-	// наконец то придумал как реализовать обратную совместимость и
-	// и впихнуть логику с бд как только стало ясно, что
-	// в переменных окружения получилось получить DSN
-	// мы просто пропишем отдельные хендлеры для них
-	// а тут сделаем проверку на то, есть ли тут databaseDSN.
+	sugar.Infow("SUCCESS TRY TO CREATE TABLE", "ERR", errExec)
 
-	// links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
+	// Отсюда нужно ставить хендлеры которые работают с базой данных
 	r := gin.Default()
+	r.POST("/", DBPostServeURL(DB, settings.Prefix, sugar))
+	r.POST("/:сrutch0/", DBPostServeURL(DB, settings.Prefix, sugar))
 	// r.GET("/ping", MWGetPing(sugar, errorStartDB))
 	// r.GET("/:idvalue", DBGetDBOriginURL(sugar))
 	// r.POST("/", DBPostDBServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	// r.POST("/:сrutch0/", DBPostDBServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
+	// r.POST("/:сrutch0/", DBPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	// r.POST("/:сrutch0/:сrutch1", DBPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	// r.POST("/api/shorten", DBPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
 	return r

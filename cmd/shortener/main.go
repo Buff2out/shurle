@@ -67,22 +67,21 @@ import (
 func main() {
 
 	/* TODO
-	Здесь будут расписаны в дальнейшем задачи для себя
-	итак инкремент 11
-	по сути задач тут две:
-	1) Переделать GetSettings (или скорее SetupRouter под новую задачу записи в бд)
-	2) Добавить функционал взятия данных из бд и добавления записи в бд
-	*/
+	 *
+	 */
 	sugar, logger := lg.GetSugaredLogger()
-	// это нужно добавить, если логер буферизован
-	// в данном случае не буферизован, но привычка хорошая
 	defer func(logger *zap.Logger) {
 		err := logger.Sync()
 		if err != nil {
 			panic("cannot close zap's sugared logger")
 		}
 	}(logger)
+	// возможно настройки как структура должна находиться в internal
+	// а не в internal/app/api/shortener . Чем я думал когда пихал их в апи...
+	// возможно руководствовался тем, что хотел все структуры хранить в одном пакете.
 	settings := internal.GetSettings(sugar)
+	// нужно подыскать более подходящее название для ginsetrout.
+	// Возможно подойдёт просто ginsetrout->routing, а SetupRouter() -> Setup()
 	r := ginsetrout.SetupRouter(settings, sugar)
 	err := r.Run(settings.Socket)
 	if err != nil {
