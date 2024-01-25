@@ -68,7 +68,6 @@ func MWPostAPIURL(prefix string, sugar *zap.SugaredLogger, filename string) func
 		reqJSON := reqsc.GetJSONRequestURL(sugar, c)
 		// Записываем хеш в ассоциатор с урлом
 		links[id] = reqJSON.URL
-		sugar.Infow("reqJSON.URL first 4 symbols", "reqJSON.URL[:4] = ", reqJSON.URL[:4])
 
 		// две строчки ниже - бизнес логика Save()
 		eventObj := event.ShURLFile{UID: strconv.Itoa(len(links)), ShortURL: id, OriginalURL: links[id]}
@@ -153,11 +152,8 @@ func SetupRouter(settings *event.Settings, sugar *zap.SugaredLogger) *gin.Engine
 	r := gin.Default()
 	r.POST("/", DBPostServeURL(DB, settings.Prefix, sugar))
 	r.POST("/:сrutch0/", DBPostServeURL(DB, settings.Prefix, sugar))
-	// r.GET("/ping", MWGetPing(sugar, errorStartDB))
-	// r.GET("/:idvalue", DBGetDBOriginURL(sugar))
-	// r.POST("/", DBPostDBServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	// r.POST("/:сrutch0/", DBPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	// r.POST("/:сrutch0/:сrutch1", DBPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-	// r.POST("/api/shorten", DBPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
+	r.POST("/api/shorten", DBPostAPIURL(DB, settings.Prefix, sugar))
+	r.GET("/:idvalue", DBGetOriginURL(DB, sugar))
+
 	return r
 }

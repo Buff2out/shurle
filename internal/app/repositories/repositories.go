@@ -27,12 +27,9 @@ func SQLInsertURL(DB *sql.DB, infoURL *shortener.InfoURL) error {
 // Вот что значит пришёл с новыми знаниями. Рефакторинг будет постепенно.
 // Ещё теперь лучше получается придумывать названия для функций. Более универсально.
 // Изначально тут было ...ByHashCode
-func SQLRetrieveByField(DB *sql.DB, hashCode string) (*sql.Rows, error) {
-	res, errQuery := DB.Query("SELECT origin FROM urls WHERE hashcode = $1", hashCode)
-	if errQuery != nil {
-		return nil, errQuery
-	}
-	return res, errQuery
+func SQLGetOriginURL(DB *sql.DB, hashCode string) *sql.Row {
+	res := DB.QueryRow("SELECT origin FROM urls WHERE hashcode = $1", hashCode)
+	return res
 }
 
 func SQLInsertTest(DB *sql.DB) error {
