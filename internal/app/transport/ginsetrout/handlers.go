@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/Buff2out/shurle/internal/app/api/shortener"
-	event "github.com/Buff2out/shurle/internal/app/api/shortener"
 	"github.com/Buff2out/shurle/internal/app/repositories"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -74,7 +73,7 @@ func DBPostAPIURL(DB *sql.DB, prefix string, sugar *zap.SugaredLogger) func(c *g
 		// filesc.AddNote(sugar, eventObj, filename)
 
 		// формируем ответ
-		var respJSON event.Shlink
+		var respJSON shortener.Shlink
 		respJSON.Result = infoURL.ShortURL
 		c.JSON(http.StatusCreated, respJSON)
 		timeEndingRequest := time.Now()
