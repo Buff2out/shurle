@@ -11,7 +11,6 @@ package main
 Особенно структуру проекта. Но боюсь к дедлайнам 3-го спринта не успеть.
 Думаю рефакторинг сделаю на следующих спринтах
 мой план:
-1) app можно в целом удалить. internal'а хватает
 2) во флагах и энвах переменные в структуре Settings
 	не соответствуют названиям в переменных средах - поправить легко, главное не забыть
 
@@ -60,12 +59,11 @@ package main
 import (
 	"github.com/Buff2out/shurle/internal"
 	lg "github.com/Buff2out/shurle/internal/app/config/logging"
-	"github.com/Buff2out/shurle/internal/app/transport/ginsetrout"
+	"github.com/Buff2out/shurle/internal/app/transport/route"
 	"go.uber.org/zap"
 )
 
 func main() {
-
 	/* TODO
 	 *
 	 */
@@ -82,7 +80,7 @@ func main() {
 	settings := internal.GetSettings(sugar)
 	// нужно подыскать более подходящее название для ginsetrout.
 	// Возможно подойдёт просто ginsetrout->routing, а SetupRouter() -> Setup()
-	r := ginsetrout.SetupRouter(settings, sugar)
+	r := route.Setup(settings, sugar)
 	err := r.Run(settings.Socket)
 	if err != nil {
 		panic(err)

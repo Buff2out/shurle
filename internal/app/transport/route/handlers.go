@@ -1,4 +1,4 @@
-package ginsetrout
+package route
 
 import (
 	"database/sql"
