@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Buff2out/shurle/internal"
+	"github.com/Buff2out/shurle/internal/app/config/server"
 	"github.com/Buff2out/shurle/internal/app/repositories"
 	"github.com/Buff2out/shurle/internal/app/services/filesc"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
@@ -122,7 +123,7 @@ func MWGetPing(sugar *zap.SugaredLogger, errorStartDB error) func(c *gin.Context
 
 var links = make(map[string]string)
 
-func Setup(settings *internal.Settings, sugar *zap.SugaredLogger) *gin.Engine {
+func Setup(settings *server.Settings, sugar *zap.SugaredLogger) *gin.Engine {
 	// версия без контекстов. Потому как у gin framework всё немного
 	// усложняется с (c *gin.Context) как пойму как реализовать вместе с ним TODO - переделаю
 	DB, errorStartDB := sql.Open("pgx", settings.DatabaseDSN)

@@ -2,7 +2,8 @@ package flags
 
 import (
 	"flag"
-	"github.com/Buff2out/shurle/internal/app/api/shortener"
+
+	"github.com/Buff2out/shurle/internal/app/config/server"
 )
 
 var (
@@ -19,9 +20,9 @@ func init() {
 	DatabaseDSN = flag.String("d", ``, "Database config like host=localhost user=username password=XXXXX dbname=my_db_name sslmode=disable")
 }
 
-func GetFlags() *shortener.Settings {
+func GetFlags() *server.Settings {
 	flag.Parse()
-	return &shortener.Settings{
+	return &server.Settings{
 		Socket:      *Socket,
 		Prefix:      *Prefix,
 		ShURLsJSON:  *ShURLsFile,

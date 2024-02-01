@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Buff2out/shurle/internal/app/config/flags"
+	"github.com/Buff2out/shurle/internal/app/config/server"
 	"github.com/caarlos0/env/v9"
 	"github.com/fatih/structs"
 	"go.uber.org/zap"
@@ -29,15 +30,8 @@ type InfoURL struct {
 	HashCode    string
 }
 
-type Settings struct {
-	Socket      string `env:"SERVER_ADDRESS,required"`
-	Prefix      string `env:"BASE_URL,required"`
-	ShURLsJSON  string `env:"FILE_STORAGE_PATH,required"`
-	DatabaseDSN string `env:"DATABASE_DSN"`
-}
-
-func GetSettings(sugar *zap.SugaredLogger) *Settings {
-	var settingsEnvs Settings
+func GetSettings(sugar *zap.SugaredLogger) *server.Settings {
+	var settingsEnvs server.Settings
 	err := env.Parse(&settingsEnvs)
 	if err != nil {
 		return filterEmptyVals(sugar, &settingsEnvs)
@@ -45,7 +39,7 @@ func GetSettings(sugar *zap.SugaredLogger) *Settings {
 	return &settingsEnvs
 }
 
-func filterEmptyVals(sugar *zap.SugaredLogger, settingsEnvs *Settings) *Settings {
+func filterEmptyVals(sugar *zap.SugaredLogger, settingsEnvs *server.Settings) *server.Settings {
 	settingsEnvsMap := structs.Map(settingsEnvs)
 	settingsFlagsMap := structs.Map(flags.GetFlags())
 	for key := range settingsEnvsMap {
@@ -55,7 +49,7 @@ func filterEmptyVals(sugar *zap.SugaredLogger, settingsEnvs *Settings) *Settings
 		}
 	}
 	sugar.Infow("Settings", "DatabaseDSN", settingsEnvsMap["DatabaseDSN"])
-	return &Settings{
+	return &server.Settings{
 		Socket:      fmt.Sprintf("%v", settingsEnvsMap["Socket"]),
 		Prefix:      fmt.Sprintf("%v", settingsEnvsMap["Prefix"]),
 		ShURLsJSON:  fmt.Sprintf("%v", settingsEnvsMap["ShURLsJSON"]),
