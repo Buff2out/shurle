@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal"
 	"github.com/Buff2out/shurle/internal/app/repositories"
 	"github.com/Buff2out/shurle/internal/app/services/reqsc"
 	shserv "github.com/Buff2out/shurle/internal/app/services/shurlsc"
@@ -56,7 +56,7 @@ func DBPostAPIURL(DB *sql.DB, prefix string, sugar *zap.SugaredLogger) func(c *g
 		timeStartingRequest := time.Now()
 		hashCode := shserv.RandStringRunes(5)
 		reqJSON := reqsc.GetJSONRequestURL(sugar, c)
-		infoURL := shortener.InfoURL{
+		infoURL := internal.InfoURL{
 			OriginalURL: reqJSON.URL,
 			ShortURL:    fmt.Sprintf("%s/%s", prefix, hashCode),
 			HashCode:    hashCode,
@@ -73,7 +73,7 @@ func DBPostAPIURL(DB *sql.DB, prefix string, sugar *zap.SugaredLogger) func(c *g
 		// filesc.AddNote(sugar, eventObj, filename)
 
 		// формируем ответ
-		var respJSON shortener.Shlink
+		var respJSON internal.Shlink
 		respJSON.Result = infoURL.ShortURL
 		c.JSON(http.StatusCreated, respJSON)
 		timeEndingRequest := time.Now()
@@ -98,7 +98,7 @@ func DBPostServeURL(DB *sql.DB, prefix string, sugar *zap.SugaredLogger) func(c 
 		}
 
 		// три строчки ниже - это бизнес логика Save().
-		infoURL := shortener.InfoURL{
+		infoURL := internal.InfoURL{
 			OriginalURL: string(b),
 			ShortURL:    fmt.Sprintf("%s/%s", prefix, id),
 			HashCode:    id,

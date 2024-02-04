@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -30,8 +30,8 @@ func DecompressedGZReader(sugar *zap.SugaredLogger, c *gin.Context) (io.ReadClos
 	return c.Request.Body, "default", nil
 }
 
-func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *Event.OriginURL {
-	var reqJSON Event.OriginURL
+func GetJSONRequestURL(sugar *zap.SugaredLogger, c *gin.Context) *internal.OriginURL {
+	var reqJSON internal.OriginURL
 	sugar.Infow(
 		"?GZIPED request?", "content-enc", c.Request.Header.Get("Content-Encoding"), "accept-enc", c.Request.Header.Get("Accept-Encoding"),
 	)

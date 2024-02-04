@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 
-	"github.com/Buff2out/shurle/internal/app/api/shortener"
+	"github.com/Buff2out/shurle/internal"
 )
 
 func SQLCreateTableURLs(urlsDB *sql.DB) error {
@@ -18,7 +18,7 @@ func SQLCreateTableURLs(urlsDB *sql.DB) error {
 	return errExec
 }
 
-func SQLInsertURL(DB *sql.DB, infoURL *shortener.InfoURL) error {
+func SQLInsertURL(DB *sql.DB, infoURL *internal.InfoURL) error {
 	_, errExec := DB.Exec("INSERT INTO urls(short, origin, hashcode) VALUES($1, $2, $3)", infoURL.ShortURL, infoURL.OriginalURL, infoURL.HashCode)
 	return errExec
 }
