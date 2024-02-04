@@ -128,20 +128,7 @@ func Setup(settings *server.Settings, sugar *zap.SugaredLogger) *gin.Engine {
 	// усложняется с (c *gin.Context) как пойму как реализовать вместе с ним TODO - переделаю
 	DB, errorStartDB := sql.Open("pgx", settings.DatabaseDSN)
 	if errorStartDB != nil {
-
-		// Ещё раз нарушаю DRY но исправлю, когда будут
-		// одинаковые хендлеры что для случая
-		// с открытием бд, что без (через файл и links)
 		sugar.Infow("NO CONNECTION DB, got no parameters ", "ERR", errorStartDB, "db", DB)
-		links = filesc.FillEvents(sugar, settings.ShURLsJSON, links)
-		r := gin.Default()
-		// r.GET("/ping", MWGetPing(sugar, errorStartDB))
-		r.GET("/:idvalue", MWGetOriginURL(sugar))
-		r.POST("/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-		r.POST("/:сrutch0/", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-		r.POST("/:сrutch0/:сrutch1", MWPostServeURL(settings.Prefix, sugar, settings.ShURLsJSON))
-		r.POST("/api/shorten", MWPostAPIURL(settings.Prefix, sugar, settings.ShURLsJSON))
-		return r
 	}
 	// комментирую, иначе "DATABASE IS CLOSED",
 	// ведь мы выходим из сетап роутера. БД нужно в мейне прописывать"
