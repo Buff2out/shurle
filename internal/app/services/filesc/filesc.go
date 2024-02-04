@@ -1,14 +1,15 @@
 package filesc
 
 import (
-	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
-	"github.com/Buff2out/shurle/internal/app/config/files"
-	"go.uber.org/zap"
 	"os"
 	"path/filepath"
+
+	"github.com/Buff2out/shurle/internal"
+	"github.com/Buff2out/shurle/internal/app/config/files"
+	"go.uber.org/zap"
 )
 
-func AddNote(sugar *zap.SugaredLogger, event Event.ShURLFile, filename string) {
+func AddNote(sugar *zap.SugaredLogger, event internal.ShURLFile, filename string) {
 	if filename != "" {
 		p, er := files.NewProducer(filename, sugar)
 		if er != nil {

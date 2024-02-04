@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	Event "github.com/Buff2out/shurle/internal/app/api/shortener"
-	"go.uber.org/zap"
 	"os"
+
+	"github.com/Buff2out/shurle/internal"
+	"go.uber.org/zap"
 )
 
 type Producer struct {
@@ -49,7 +50,7 @@ func NewConsumer(filename string, sugar *zap.SugaredLogger) (*Consumer, error) {
 	}, nil
 }
 
-func (c *Consumer) ReadEvent() (*Event.ShURLFile, error) {
+func (c *Consumer) ReadEvent() (*internal.ShURLFile, error) {
 	// одиночное сканирование до следующей строки
 	if !c.scanner.Scan() {
 		return nil, fmt.Errorf("КОНЕЦ СТРОКИ")
@@ -57,7 +58,7 @@ func (c *Consumer) ReadEvent() (*Event.ShURLFile, error) {
 	// читаем данные из scanner
 	data := c.scanner.Bytes()
 
-	event := Event.ShURLFile{}
+	event := internal.ShURLFile{}
 	err := json.Unmarshal(data, &event)
 	if err != nil {
 		return nil, err
@@ -66,7 +67,7 @@ func (c *Consumer) ReadEvent() (*Event.ShURLFile, error) {
 	return &event, nil
 }
 
-func (p *Producer) WriteEvent(event *Event.ShURLFile) error {
+func (p *Producer) WriteEvent(event *internal.ShURLFile) error {
 	data, err := json.Marshal(&event)
 	if err != nil {
 		return err
